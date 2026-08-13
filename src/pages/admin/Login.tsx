@@ -1,14 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useBranding } from '@/hooks/use-branding'
 import { useAuth } from '@/lib/auth'
-import { resolverBranding } from '@/lib/branding'
-import { supabase } from '@/lib/supabase'
-import type { Tables } from '@/types/database'
 
 export default function Login() {
   const { session, carregando, entrar } = useAuth()
@@ -19,18 +17,9 @@ export default function Login() {
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState<string | null>(null)
   const [enviando, setEnviando] = useState(false)
-  const [config, setConfig] = useState<Tables<'configuracoes'> | null>(null)
 
   // O nome da imobiliária vem do banco — nunca hardcoded (regra de replicação).
-  useEffect(() => {
-    supabase
-      .from('configuracoes')
-      .select('*')
-      .maybeSingle()
-      .then(({ data }) => setConfig(data))
-  }, [])
-
-  const branding = resolverBranding(config)
+  const branding = useBranding()
   const destino = (local.state as { de?: string } | null)?.de ?? '/admin'
 
   if (!carregando && session) return <Navigate to={destino} replace />
