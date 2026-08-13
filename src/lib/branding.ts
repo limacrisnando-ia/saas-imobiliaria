@@ -70,10 +70,12 @@ export function resolverBranding(
   }
 }
 
-/** Só dígitos, no formato que o wa.me espera (com DDI 55). */
-export function linkWhatsApp(whatsapp: string | null): string | null {
+/** Só dígitos, no formato que o wa.me espera (com DDI 55). `mensagem` pré-preenche a conversa. */
+export function linkWhatsApp(whatsapp: string | null, mensagem?: string): string | null {
   if (!whatsapp) return null
   const digitos = whatsapp.replace(/\D/g, '')
   if (digitos.length < 10) return null
-  return `https://wa.me/${digitos.startsWith('55') ? digitos : `55${digitos}`}`
+  const numero = digitos.startsWith('55') ? digitos : `55${digitos}`
+  const texto = mensagem ? `?text=${encodeURIComponent(mensagem)}` : ''
+  return `https://wa.me/${numero}${texto}`
 }

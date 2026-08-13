@@ -13,6 +13,7 @@ import VisitaFormulario from '@/pages/admin/visitas/VisitaFormulario'
 import VisitasLista from '@/pages/admin/visitas/VisitasLista'
 import Catalogo from '@/pages/public/Catalogo'
 import Home from '@/pages/public/Home'
+import ImovelDetalhe from '@/pages/public/ImovelDetalhe'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/imoveis" element={<Catalogo />} />
+            <Route path="/imoveis/:slug" element={<ImovelDetalhe />} />
           </Route>
 
           <Route path="/admin/login" element={<Login />} />

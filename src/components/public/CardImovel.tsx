@@ -1,7 +1,9 @@
 import { Bath, Bed, Car, MapPin, Star } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/badge'
 import { ROTULOS_FINALIDADE, valorExibido } from '@/lib/imovel-labels'
+import { slugImovel } from '@/lib/slug'
 import type { Tables } from '@/types/database'
 
 type ImovelComCapa = Tables<'imoveis_publicos'> & { capaUrl: string | null }
@@ -14,7 +16,9 @@ export function CardImovel({
   corDestaque: string
 }) {
   return (
-    <article className="flex flex-col overflow-hidden rounded-xl border border-border">
+    <Link
+      to={imovel.id ? `/imoveis/${slugImovel(imovel.id, imovel.titulo ?? '')}` : '#'}
+      className="flex flex-col overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/30">
       <div className="relative aspect-video w-full bg-muted">
         {imovel.capaUrl ? (
           <img
@@ -76,6 +80,6 @@ export function CardImovel({
           {valorExibido(imovel, 'Consulte-nos')}
         </p>
       </div>
-    </article>
+    </Link>
   )
 }
