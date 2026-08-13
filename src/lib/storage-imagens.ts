@@ -25,12 +25,13 @@ export function validarArquivo(arquivo: File): string | null {
   return null
 }
 
+/** `pasta` organiza o bucket por dono do arquivo: o id do imóvel para fotos de imóveis, "configuracoes" para a logo. */
 export async function enviarImagem(
-  imovelId: string,
+  pasta: string,
   arquivo: File
 ): Promise<{ url: string; erro?: undefined } | { url?: undefined; erro: string }> {
   const extensao = EXTENSAO_POR_TIPO[arquivo.type] ?? 'jpg'
-  const caminho = `${imovelId}/${crypto.randomUUID()}.${extensao}`
+  const caminho = `${pasta}/${crypto.randomUUID()}.${extensao}`
 
   const { error } = await supabase.storage.from(BUCKET_IMAGENS).upload(caminho, arquivo)
   if (error) return { erro: error.message }

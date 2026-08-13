@@ -24,10 +24,15 @@ export type Branding = {
 
 const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
 
+/** Usado tanto aqui quanto na validação do formulário de configurações. */
+export function corHexValida(cor: string): boolean {
+  return HEX.test(cor.trim())
+}
+
 /** Descarta valor vazio, só espaços ou hex inválido. */
 function corValida(cor: string | null | undefined, padrao: string): string {
   const limpa = cor?.trim()
-  return limpa && HEX.test(limpa) ? limpa : padrao
+  return limpa && corHexValida(limpa) ? limpa : padrao
 }
 
 function vazioViraNulo(valor: string | null | undefined): string | null {
