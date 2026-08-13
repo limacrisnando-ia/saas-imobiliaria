@@ -79,17 +79,25 @@ campo interno (nunca vai pro site) e campos de controle.
 | comodidades      | lista flexível| mobiliado, condomínio fechado, etc. — cresce sem mudar schema|
 | status           | texto/enum    | disponivel, reservado, vendido, alugado                     |
 
-### Campo INTERNO (nunca aparece no site)
-| Campo                    | Tipo        | Observação                                             |
-|--------------------------|-------------|--------------------------------------------------------|
-| observacoes_documentacao | texto longo | pendências de documentação — SÓ no painel, nunca público |
+### Campo de documentação (interno por padrão, publicável caso a caso)
+| Campo                    | Tipo        | Observação                                                        |
+|--------------------------|-------------|------------------------------------------------------------------|
+| observacoes_documentacao | texto longo | pendências de documentação. Opcional. Interno por padrão.        |
+| documentacao_publica     | booleano    | padrão FALSE. Só quando TRUE a observação acima aparece no site. |
+
+**Regra do campo de documentação (importante):** este campo é opcional e, por padrão, interno.
+O Ari decide imóvel a imóvel se quer publicá-lo, ligando `documentacao_publica`. O padrão FALSE é a
+rede de segurança: no silêncio, a observação NÃO vai para o site. A proteção mora na view pública
+(abaixo), não só na tela — quem consultar a API direta também não vê a observação enquanto o
+interruptor estiver desligado.
 
 ### Campos de controle
-| Campo       | Tipo      | Observação                                              |
-|-------------|-----------|--------------------------------------------------------|
-| publicado   | booleano  | controla se aparece no site                            |
-| destaque    | booleano  | para destacar na home                                  |
-| criado_em   | data/hora | timestamp de cadastro                                  |
+| Campo         | Tipo      | Observação                                              |
+|---------------|-----------|---------------------------------------------------------|
+| publicado     | booleano  | controla se aparece no site                             |
+| destaque      | booleano  | para destacar na home                                   |
+| criado_em     | data/hora | timestamp de cadastro                                   |
+| atualizado_em | data/hora | timestamp da última edição, mantido por trigger no banco |
 
 **Regra de negócio:** imóvel com status `vendido` ou `alugado` continua no banco (histórico),
 mas some do site automaticamente. No site só aparece o que estiver `publicado = true` E com
@@ -113,6 +121,11 @@ Várias imagens por imóvel. Os arquivos ficam no Storage; a tabela guarda o lin
 | capa      | booleano      | uma por imóvel; é a imagem principal|
 
 **Acesso:** anon lê apenas imagens de imóveis que estão públicos. Autenticado lê tudo e escreve.
+
+A política do anon usa a função `privado.imovel_esta_publico(uuid)`. Ela é `SECURITY DEFINER` por
+necessidade: um `EXISTS` direto contra `imoveis` dentro da política rodaria sob o RLS do anon — que
+não enxerga a tabela — e nenhuma imagem apareceria no site. Fica no schema `privado` (não exposto
+pelo PostgREST) para não virar um endpoint `/rest/v1/rpc/`.
 
 ---
 
@@ -141,18 +154,33 @@ esconder o campo interno é uma view que o omite.
 
 Esta view retorna **apenas**:
 - imóveis com `publicado = true` E status em (`disponivel`, `reservado`);
-- **sem** a coluna `observacoes_documentacao`.
+- a coluna `observacoes_documentacao` **somente quando** `documentacao_publica = true`; quando for
+  `false`, a view devolve esse campo vazio/nulo, mesmo que haja texto escrito no painel.
 
 Só esta view é legível por anon. O site público sempre consulta `imoveis_publicos`, nunca a
-tabela `imoveis`.
+tabela `imoveis`. A tabela base `imoveis` (com a observação de documentação sempre visível para o
+Ari) continua acessível apenas ao usuário autenticado.
+
+Além disso, a view:
+- traz `tipo_nome` já resolvido (join com `tipos_imovel`), para o site não precisar de segunda consulta;
+- **não expõe** `documentacao_publica` nem `publicado` — o site não tem por que saber do interruptor.
+
+**Nota técnica (por que o linter reclama):** a view roda com os privilégios do dono
+(`security_invoker = false`, o padrão do Postgres). É isso que permite ela ler `imoveis` enquanto o
+anon não tem privilégio nenhum na tabela base. O advisor do Supabase marca isso como
+`security_definer_view` (ERROR) — aqui é intencional: o filtro está dentro da view e
+`security_barrier` está ativo. A alternativa exigiria dar SELECT ao anon em `imoveis`, o que vazaria
+a observação de documentação.
 
 ---
 
 ## Storage: bucket de imagens
 
-Um bucket para as imagens dos imóveis (e a logo da imobiliária).
-- Leitura: pública.
-- Escrita/remoção: só autenticado.
+Bucket `imoveis`, para as imagens dos imóveis (e a logo da imobiliária).
+- Leitura: pública (bucket `public = true`, portanto não precisa de política de SELECT).
+- Escrita/atualização/remoção: só autenticado, via políticas em `storage.objects` restritas a
+  `bucket_id = 'imoveis'`.
+- Limite de 5 MB por arquivo; MIME types aceitos: jpeg, png, webp, avif, svg.
 
 ---
 

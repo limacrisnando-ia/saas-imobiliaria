@@ -12,8 +12,9 @@
 - No cliente usamos SOMENTE a anon key (VITE_SUPABASE_ANON_KEY), via env. NUNCA a service role key.
 - Segurança por RLS. O site público SÓ enxerga imóveis publicados e disponíveis, através de uma
   VIEW pública — nunca a tabela base direto.
-- Campo interno "observacoes_documentacao" NUNCA vai para o site (só aparece no painel). Como RLS é
-  por linha, a proteção da coluna se faz pela view pública que a omite.
+- Campo "observacoes_documentacao": opcional e interno por padrão. É publicável caso a caso via o
+  campo booleano "documentacao_publica" (padrão FALSE). A view pública só expõe a observação quando
+  documentacao_publica = true; caso contrário devolve vazio. A proteção mora na view, não só na tela.
 - A aba "visitas" é registro interno (log). Nunca exposta ao público. Não é agendamento.
 - Identidade/branding (nome, WhatsApp, cores, logo) vive na tabela "configuracoes", NUNCA hardcoded
   no código — é isso que torna o sistema replicável.
@@ -24,8 +25,8 @@
 - tipos_imovel: lista editável (casa, apartamento, terreno, ponto comercial, chácara, kitnet...).
 - imoveis: campos públicos (título, descrição, tipo, finalidade venda/aluguel/ambos, valor_venda,
   valor_aluguel, taxas, aceita_permuta, endereço/bairro/cidade, quartos, banheiros, vagas,
-  area_construida, area_total, comodidades, status, publicado, destaque) + campo INTERNO
-  (observacoes_documentacao).
+  area_construida, area_total, comodidades, status, publicado, destaque) + documentação
+  (observacoes_documentacao + documentacao_publica, interno por padrão).
 - imovel_imagens: galeria (imovel_id, url, ordem, capa).
 - visitas: registro interno (imovel_id, visitante, contato, data_visita, responsavel, observacoes).
 
