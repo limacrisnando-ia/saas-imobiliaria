@@ -4,7 +4,8 @@ import AdminLayout from '@/components/admin/AdminLayout'
 import RotaProtegida from '@/components/RotaProtegida'
 import { AuthProvider } from '@/lib/auth'
 import Configuracoes from '@/pages/admin/Configuracoes'
-import Imoveis from '@/pages/admin/Imoveis'
+import ImovelFormulario from '@/pages/admin/imoveis/ImovelFormulario'
+import ImoveisLista from '@/pages/admin/imoveis/ImoveisLista'
 import Login from '@/pages/admin/Login'
 import Visitas from '@/pages/admin/Visitas'
 import Home from '@/pages/public/Home'
@@ -19,7 +20,9 @@ function App() {
         <Route element={<RotaProtegida />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="imoveis" replace />} />
-            <Route path="imoveis" element={<Imoveis />} />
+            <Route path="imoveis" element={<ImoveisLista />} />
+            <Route path="imoveis/novo" element={<ImovelFormulario />} />
+            <Route path="imoveis/:id/editar" element={<ImovelFormulario />} />
             <Route path="visitas" element={<Visitas />} />
             <Route path="configuracoes" element={<Configuracoes />} />
           </Route>
