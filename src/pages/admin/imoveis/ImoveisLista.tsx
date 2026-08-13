@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { supabase } from '@/lib/supabase'
-import { CORES_STATUS, ROTULOS_FINALIDADE, ROTULOS_STATUS, formatarMoeda } from '@/lib/imovel-labels'
+import { CORES_STATUS, ROTULOS_FINALIDADE, ROTULOS_STATUS, valorExibido } from '@/lib/imovel-labels'
 import { cn } from '@/lib/utils'
 
 async function buscarImoveis() {
@@ -58,17 +58,6 @@ export default function ImoveisLista() {
       return
     }
     setImoveis((atual) => atual?.filter((i) => i.id !== id) ?? null)
-  }
-
-  function valorExibido(imovel: ImovelLinha): string {
-    const partes: string[] = []
-    if (imovel.finalidade !== 'aluguel' && imovel.valor_venda !== null) {
-      partes.push(formatarMoeda(imovel.valor_venda)!)
-    }
-    if (imovel.finalidade !== 'venda' && imovel.valor_aluguel !== null) {
-      partes.push(`${formatarMoeda(imovel.valor_aluguel)}/mês`)
-    }
-    return partes.length > 0 ? partes.join(' · ') : '—'
   }
 
   return (

@@ -25,3 +25,21 @@ export function formatarMoeda(valor: number | null): string | null {
   if (valor === null) return null
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
+
+type ImovelComValor = {
+  finalidade: Enums<'finalidade_imovel'> | null
+  valor_venda: number | null
+  valor_aluguel: number | null
+}
+
+/** Mostra só o valor que faz sentido para a finalidade (regra usada no painel e no site público). */
+export function valorExibido(imovel: ImovelComValor, textoVazio = '—'): string {
+  const partes: string[] = []
+  if (imovel.finalidade !== 'aluguel' && imovel.valor_venda !== null) {
+    partes.push(formatarMoeda(imovel.valor_venda)!)
+  }
+  if (imovel.finalidade !== 'venda' && imovel.valor_aluguel !== null) {
+    partes.push(`${formatarMoeda(imovel.valor_aluguel)}/mês`)
+  }
+  return partes.length > 0 ? partes.join(' · ') : textoVazio
+}

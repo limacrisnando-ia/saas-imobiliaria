@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import AdminLayout from '@/components/admin/AdminLayout'
+import PublicLayout from '@/components/public/PublicLayout'
 import RotaProtegida from '@/components/RotaProtegida'
 import { AuthProvider } from '@/lib/auth'
 import { BrandingProvider } from '@/lib/branding-context'
@@ -17,7 +18,9 @@ function App() {
     <BrandingProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<Home />} />
+          </Route>
 
           <Route path="/admin/login" element={<Login />} />
           <Route element={<RotaProtegida />}>
