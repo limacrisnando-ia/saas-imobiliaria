@@ -1,13 +1,23 @@
 import { Route, Routes } from 'react-router-dom'
-import Home from '@/pages/public/Home'
+
+import RotaProtegida from '@/components/RotaProtegida'
+import { AuthProvider } from '@/lib/auth'
 import Dashboard from '@/pages/admin/Dashboard'
+import Login from '@/pages/admin/Login'
+import Home from '@/pages/public/Home'
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/admin" element={<Dashboard />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<Home />} />
+
+        <Route path="/admin/login" element={<Login />} />
+        <Route element={<RotaProtegida />}>
+          <Route path="/admin" element={<Dashboard />} />
+        </Route>
+      </Routes>
+    </AuthProvider>
   )
 }
 
