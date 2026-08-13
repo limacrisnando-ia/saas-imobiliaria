@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Bath, Bed, Car, MapPin, MessageCircle } from 'lucide-react'
+import { MessageCircle } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
+import { CardImovel } from '@/components/public/CardImovel'
 import { useBranding } from '@/hooks/use-branding'
 import { linkWhatsApp } from '@/lib/branding'
-import { ROTULOS_FINALIDADE, valorExibido } from '@/lib/imovel-labels'
 import { supabase } from '@/lib/supabase'
 import type { Tables } from '@/types/database'
 
@@ -65,22 +66,37 @@ export default function Home() {
           <p className="text-white/80 sm:text-lg">
             Casas, apartamentos e terrenos selecionados para comprar ou alugar.
           </p>
-          {linkWhats && (
-            <a
-              href={linkWhats}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-foreground hover:bg-white/90"
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              to="/imoveis"
+              className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-foreground hover:bg-white/90"
             >
-              <MessageCircle className="size-4" />
-              Falar com um corretor
-            </a>
-          )}
+              Ver todos os imóveis
+            </Link>
+            {linkWhats && (
+              <a
+                href={linkWhats}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/10"
+              >
+                <MessageCircle className="size-4" />
+                Falar com um corretor
+              </a>
+            )}
+          </div>
         </div>
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6">
-        <h2 className="mb-6 text-xl font-medium sm:text-2xl">Imóveis em destaque</h2>
+        <div className="mb-6 flex items-center justify-between gap-3">
+          <h2 className="text-xl font-medium sm:text-2xl">Imóveis em destaque</h2>
+          {destaques && destaques.length > 0 && (
+            <Link to="/imoveis" className="text-sm font-medium hover:underline">
+              Ver todos →
+            </Link>
+          )}
+        </div>
 
         {erro && (
           <p role="alert" className="text-sm text-destructive">
@@ -101,65 +117,7 @@ export default function Home() {
         {destaques && destaques.length > 0 && (
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {destaques.map((imovel) => (
-              <article
-                key={imovel.id}
-                className="flex flex-col overflow-hidden rounded-xl border border-border"
-              >
-                <div className="aspect-video w-full bg-muted">
-                  {imovel.capaUrl ? (
-                    <img
-                      src={imovel.capaUrl}
-                      alt={imovel.titulo ?? ''}
-                      className="size-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex size-full items-center justify-center text-xs text-muted-foreground">
-                      Sem foto
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-1 flex-col gap-2 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {imovel.tipo_nome}
-                    {imovel.finalidade && ` · ${ROTULOS_FINALIDADE[imovel.finalidade]}`}
-                  </p>
-                  <h3 className="font-medium">{imovel.titulo}</h3>
-
-                  {(imovel.bairro || imovel.cidade) && (
-                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <MapPin className="size-3.5 shrink-0" />
-                      {[imovel.bairro, imovel.cidade].filter(Boolean).join(', ')}
-                    </p>
-                  )}
-
-                  <div className="flex gap-3 text-xs text-muted-foreground">
-                    {imovel.quartos !== null && (
-                      <span className="inline-flex items-center gap-1">
-                        <Bed className="size-3.5" />
-                        {imovel.quartos}
-                      </span>
-                    )}
-                    {imovel.banheiros !== null && (
-                      <span className="inline-flex items-center gap-1">
-                        <Bath className="size-3.5" />
-                        {imovel.banheiros}
-                      </span>
-                    )}
-                    {imovel.vagas !== null && (
-                      <span className="inline-flex items-center gap-1">
-                        <Car className="size-3.5" />
-                        {imovel.vagas}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="mt-auto pt-2 font-medium" style={{ color: branding.corPrimaria }}>
-                    {valorExibido(imovel, 'Consulte-nos')}
-                  </p>
-                </div>
-              </article>
+              <CardImovel key={imovel.id} imovel={imovel} corDestaque={branding.corPrimaria} />
             ))}
           </div>
         )}

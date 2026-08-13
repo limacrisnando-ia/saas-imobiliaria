@@ -11,6 +11,7 @@ import ImoveisLista from '@/pages/admin/imoveis/ImoveisLista'
 import Login from '@/pages/admin/Login'
 import VisitaFormulario from '@/pages/admin/visitas/VisitaFormulario'
 import VisitasLista from '@/pages/admin/visitas/VisitasLista'
+import Catalogo from '@/pages/public/Catalogo'
 import Home from '@/pages/public/Home'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/imoveis" element={<Catalogo />} />
           </Route>
 
           <Route path="/admin/login" element={<Login />} />

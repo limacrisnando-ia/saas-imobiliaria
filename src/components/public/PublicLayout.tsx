@@ -36,6 +36,10 @@ export default function PublicLayout() {
             <span className="truncate text-base font-medium">{branding.nome}</span>
           </Link>
 
+          <Link to="/imoveis" className="ml-4 text-sm font-medium text-muted-foreground hover:text-foreground">
+            Imóveis
+          </Link>
+
           {linkWhats && (
             <a
               href={linkWhats}
