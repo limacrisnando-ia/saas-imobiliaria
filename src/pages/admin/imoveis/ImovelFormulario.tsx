@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { ComodidadesEditor } from '@/components/admin/imoveis/ComodidadesEditor'
+import { GaleriaImagens } from '@/components/admin/imoveis/GaleriaImagens'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -455,6 +456,18 @@ export default function ImovelFormulario() {
               onChange={(e) => atualizar('descricao', e.target.value)}
             />
           </div>
+        </section>
+
+        {/* Fotos: só existem depois que o imóvel tem id */}
+        <section className="flex flex-col gap-4">
+          <h2 className="text-sm font-medium text-muted-foreground">Fotos</h2>
+          {editando && id ? (
+            <GaleriaImagens imovelId={id} />
+          ) : (
+            <p className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+              Salve o imóvel primeiro para adicionar fotos.
+            </p>
+          )}
         </section>
 
         {/* Bloco 2: documentação — interno por padrão */}
