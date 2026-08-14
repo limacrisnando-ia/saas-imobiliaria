@@ -87,7 +87,7 @@ export default function Configuracoes() {
     const resultado = await enviarImagem('configuracoes', arquivo)
     setEnviandoLogo(false)
 
-    if (resultado.erro) {
+    if (!resultado.sucesso) {
       setErro(resultado.erro)
       return
     }

@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 
 import { CardImovel } from '@/components/public/CardImovel'
 import { useBranding } from '@/hooks/use-branding'
+import { useSeo } from '@/hooks/use-seo'
 import { linkWhatsApp } from '@/lib/branding'
 import { supabase } from '@/lib/supabase'
 import type { Tables } from '@/types/database'
@@ -45,6 +46,12 @@ export default function Home() {
   const linkWhats = linkWhatsApp(branding.whatsapp)
   const [destaques, setDestaques] = useState<ImovelDestaque[] | null>(null)
   const [erro, setErro] = useState<string | null>(null)
+
+  useSeo({
+    title: `${branding.nome} — Imóveis à venda e para alugar`,
+    description: `Casas, apartamentos e terrenos selecionados pela ${branding.nome}. Fale direto com um corretor pelo WhatsApp.`,
+    image: branding.logoUrl ?? undefined,
+  })
 
   useEffect(() => {
     buscarDestaques().then(({ dados, erro }) => {

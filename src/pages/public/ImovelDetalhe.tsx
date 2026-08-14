@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 
 import { Badge } from '@/components/ui/badge'
 import { useBranding } from '@/hooks/use-branding'
+import { useSeo } from '@/hooks/use-seo'
 import { linkWhatsApp } from '@/lib/branding'
 import { CORES_STATUS, ROTULOS_FINALIDADE, ROTULOS_STATUS, valorExibido } from '@/lib/imovel-labels'
 import { idDoSlug } from '@/lib/slug'
@@ -11,17 +12,13 @@ import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import type { Tables } from '@/types/database'
 
-// Seleção explícita de colunas. observacoes_documentacao entra aqui de
-// propósito: a view só a preenche quando documentacao_publica = true (nula
-// caso contrário), então "vem null" já é o comportamento de esconder — não
-// precisamos buscar documentacao_publica em si, só respeitar o que a view
-// decidiu devolver.
-const COLUNAS_PUBLICAS =
-  'id, titulo, descricao, tipo_id, tipo_nome, finalidade, valor_venda, valor_aluguel, ' +
-  'taxas_adicionais, aceita_permuta, permuta_obs, cidade, bairro, endereco, quartos, ' +
-  'banheiros, vagas, area_construida, area_total, comodidades, status, destaque, ' +
-  'observacoes_documentacao, criado_em, atualizado_em'
-
+// Seleção explícita de colunas, como um único literal — o supabase-js só
+// infere o tipo de retorno quando a string do .select() é um literal direto
+// na chamada (não uma const construída com `+`, que vira `string` genérico
+// pro type-checker). observacoes_documentacao entra aqui de propósito: a view
+// só a preenche quando documentacao_publica = true (nula caso contrário),
+// então "vem null" já é o comportamento de esconder — não precisamos buscar
+// documentacao_publica em si, só respeitar o que a view decidiu devolver.
 type Imovel = Pick<
   Tables<'imoveis_publicos'>,
   | 'id'
@@ -51,6 +48,22 @@ type Imovel = Pick<
   | 'atualizado_em'
 >
 
+function truncar(texto: string, tamanho: number): string {
+  const limpo = texto.replace(/\s+/g, ' ').trim()
+  return limpo.length > tamanho ? `${limpo.slice(0, tamanho - 1)}…` : limpo
+}
+
+function descricaoSeoDoImovel(imovel: Imovel): string {
+  if (imovel.descricao) return truncar(imovel.descricao, 155)
+  const partes = [
+    imovel.tipo_nome,
+    imovel.quartos !== null ? `${imovel.quartos} quarto(s)` : null,
+    [imovel.bairro, imovel.cidade].filter(Boolean).join(', ') || null,
+    valorExibido(imovel),
+  ].filter(Boolean)
+  return partes.join(' · ')
+}
+
 export default function ImovelDetalhe() {
   const { slug } = useParams<{ slug: string }>()
   const branding = useBranding()
@@ -75,7 +88,9 @@ export default function ImovelDetalhe() {
     async function carregar(idImovel: string) {
       const { data } = await supabase
         .from('imoveis_publicos')
-        .select(COLUNAS_PUBLICAS)
+        .select(
+          'id, titulo, descricao, tipo_id, tipo_nome, finalidade, valor_venda, valor_aluguel, taxas_adicionais, aceita_permuta, permuta_obs, cidade, bairro, endereco, quartos, banheiros, vagas, area_construida, area_total, comodidades, status, destaque, observacoes_documentacao, criado_em, atualizado_em'
+        )
         .eq('id', idImovel)
         .maybeSingle()
 
@@ -100,6 +115,23 @@ export default function ImovelDetalhe() {
       ativo = false
     }
   }, [slug])
+
+  // useSeo precisa rodar sempre, nos três estados (carregando/não encontrado/
+  // carregado) — por isso vem antes dos `return` condicionais abaixo, com
+  // valores que fazem sentido pra cada caso.
+  const capa = imagens.find((img) => img.capa) ?? imagens[0]
+  useSeo({
+    title: imovel
+      ? `${imovel.titulo} — ${branding.nome}`
+      : imovel === null
+        ? `Imóvel não encontrado — ${branding.nome}`
+        : branding.nome,
+    description: imovel
+      ? descricaoSeoDoImovel(imovel)
+      : `Confira os imóveis disponíveis com a ${branding.nome}.`,
+    image: capa?.url,
+    type: imovel ? 'article' : 'website',
+  })
 
   if (imovel === undefined) {
     return <p className="mx-auto max-w-4xl px-4 py-12 text-sm text-muted-foreground sm:px-6">Carregando…</p>
@@ -240,7 +272,7 @@ export default function ImovelDetalhe() {
               </div>
             )}
 
-            {imovel.comodidades.length > 0 && (
+            {imovel.comodidades && imovel.comodidades.length > 0 && (
               <div className="flex flex-col gap-2">
                 <h2 className="font-medium">Comodidades</h2>
                 <div className="flex flex-wrap gap-1.5">

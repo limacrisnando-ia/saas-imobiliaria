@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useBranding } from '@/hooks/use-branding'
+import { useSeo } from '@/hooks/use-seo'
 import { supabase } from '@/lib/supabase'
 import type { Tables } from '@/types/database'
 
@@ -93,6 +94,11 @@ async function buscarCapas(ids: string[]): Promise<Map<string, string>> {
 
 export default function Catalogo() {
   const branding = useBranding()
+
+  useSeo({
+    title: `Imóveis disponíveis — ${branding.nome}`,
+    description: `Filtre por tipo, finalidade, cidade, valor e quartos entre os imóveis à venda e para alugar da ${branding.nome}.`,
+  })
 
   const [tipos, setTipos] = useState<Tables<'tipos_imovel'>[]>([])
   const [filtros, setFiltros] = useState<Filtros>(FILTROS_VAZIOS)

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+
+Sitemap: https://catalogo-ribeiro.pages.dev/sitemap.xml

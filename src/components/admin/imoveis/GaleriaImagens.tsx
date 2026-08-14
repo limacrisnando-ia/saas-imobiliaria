@@ -61,7 +61,7 @@ export function GaleriaImagens({ imovelId }: { imovelId: string }) {
       setEnviando({ atual: indice + 1, total: validos.length })
 
       const resultado = await enviarImagem(imovelId, arquivo)
-      if (resultado.erro) {
+      if (!resultado.sucesso) {
         erros.push(`${arquivo.name}: ${resultado.erro}`)
         continue
       }

@@ -25,19 +25,18 @@ export function validarArquivo(arquivo: File): string | null {
   return null
 }
 
+export type ResultadoEnvio = { sucesso: true; url: string } | { sucesso: false; erro: string }
+
 /** `pasta` organiza o bucket por dono do arquivo: o id do imóvel para fotos de imóveis, "configuracoes" para a logo. */
-export async function enviarImagem(
-  pasta: string,
-  arquivo: File
-): Promise<{ url: string; erro?: undefined } | { url?: undefined; erro: string }> {
+export async function enviarImagem(pasta: string, arquivo: File): Promise<ResultadoEnvio> {
   const extensao = EXTENSAO_POR_TIPO[arquivo.type] ?? 'jpg'
   const caminho = `${pasta}/${crypto.randomUUID()}.${extensao}`
 
   const { error } = await supabase.storage.from(BUCKET_IMAGENS).upload(caminho, arquivo)
-  if (error) return { erro: error.message }
+  if (error) return { sucesso: false, erro: error.message }
 
   const { data } = supabase.storage.from(BUCKET_IMAGENS).getPublicUrl(caminho)
-  return { url: data.publicUrl }
+  return { sucesso: true, url: data.publicUrl }
 }
 
 /** Recupera o caminho dentro do bucket a partir da URL pública salva em imovel_imagens.url. */
