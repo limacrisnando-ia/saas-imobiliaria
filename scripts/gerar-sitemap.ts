@@ -1,7 +1,8 @@
 /**
  * Gera dist/sitemap.xml depois do build, com as páginas estáticas + uma
- * entrada por imóvel publicado. Roda como um script Node comum (Node 24+
- * executa .ts nativamente) — não passa pelo Vite, por isso importa
+ * entrada por imóvel publicado. Roda via `tsx` (não depende de suporte
+ * nativo a .ts no Node, que varia entre a máquina local e o build do
+ * Cloudflare Pages) — não passa pelo Vite, por isso importa
  * src/lib/slug.ts por caminho relativo em vez do alias "@/".
  *
  * LIMITAÇÃO: o sitemap só é atualizado a cada build/deploy, não em tempo
