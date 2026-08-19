@@ -13,6 +13,16 @@ export const ROTULOS_STATUS: Record<Enums<'status_imovel'>, string> = {
   alugado: 'Alugado',
 }
 
+export const ROTULOS_ORIGEM: Record<Enums<'origem_imovel'>, string> = {
+  proprio: 'Próprio (da imobiliária)',
+  intermediacao: 'Intermediação (de terceiro)',
+}
+
+export const ROTULOS_TIPO_COMISSAO: Record<Enums<'tipo_comissao'>, string> = {
+  percentual: 'Percentual (%)',
+  fixo: 'Valor fixo (R$)',
+}
+
 /** Regra do CLAUDE.md: disponivel → verde · reservado → âmbar · vendido/alugado → cinza. */
 export const CORES_STATUS: Record<Enums<'status_imovel'>, string> = {
   disponivel: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400',

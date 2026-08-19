@@ -59,6 +59,10 @@ export type Database = {
           bairro: string | null
           banheiros: number | null
           cidade: string | null
+          comissao_aluguel_tipo: Database["public"]["Enums"]["tipo_comissao"] | null
+          comissao_aluguel_valor: number | null
+          comissao_venda_tipo: Database["public"]["Enums"]["tipo_comissao"] | null
+          comissao_venda_valor: number | null
           comodidades: string[]
           criado_em: string
           descricao: string | null
@@ -68,7 +72,10 @@ export type Database = {
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
           id: string
           observacoes_documentacao: string | null
+          origem: Database["public"]["Enums"]["origem_imovel"]
           permuta_obs: string | null
+          proprietario_contato: string | null
+          proprietario_nome: string | null
           publicado: boolean
           quartos: number | null
           status: Database["public"]["Enums"]["status_imovel"]
@@ -87,6 +94,10 @@ export type Database = {
           bairro?: string | null
           banheiros?: number | null
           cidade?: string | null
+          comissao_aluguel_tipo?: Database["public"]["Enums"]["tipo_comissao"] | null
+          comissao_aluguel_valor?: number | null
+          comissao_venda_tipo?: Database["public"]["Enums"]["tipo_comissao"] | null
+          comissao_venda_valor?: number | null
           comodidades?: string[]
           criado_em?: string
           descricao?: string | null
@@ -96,7 +107,10 @@ export type Database = {
           finalidade: Database["public"]["Enums"]["finalidade_imovel"]
           id?: string
           observacoes_documentacao?: string | null
+          origem?: Database["public"]["Enums"]["origem_imovel"]
           permuta_obs?: string | null
+          proprietario_contato?: string | null
+          proprietario_nome?: string | null
           publicado?: boolean
           quartos?: number | null
           status?: Database["public"]["Enums"]["status_imovel"]
@@ -115,6 +129,10 @@ export type Database = {
           bairro?: string | null
           banheiros?: number | null
           cidade?: string | null
+          comissao_aluguel_tipo?: Database["public"]["Enums"]["tipo_comissao"] | null
+          comissao_aluguel_valor?: number | null
+          comissao_venda_tipo?: Database["public"]["Enums"]["tipo_comissao"] | null
+          comissao_venda_valor?: number | null
           comodidades?: string[]
           criado_em?: string
           descricao?: string | null
@@ -124,7 +142,10 @@ export type Database = {
           finalidade?: Database["public"]["Enums"]["finalidade_imovel"]
           id?: string
           observacoes_documentacao?: string | null
+          origem?: Database["public"]["Enums"]["origem_imovel"]
           permuta_obs?: string | null
+          proprietario_contato?: string | null
+          proprietario_nome?: string | null
           publicado?: boolean
           quartos?: number | null
           status?: Database["public"]["Enums"]["status_imovel"]
@@ -293,7 +314,9 @@ export type Database = {
     }
     Enums: {
       finalidade_imovel: "venda" | "aluguel" | "ambos"
+      origem_imovel: "proprio" | "intermediacao"
       status_imovel: "disponivel" | "reservado" | "vendido" | "alugado"
+      tipo_comissao: "percentual" | "fixo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -422,7 +445,9 @@ export const Constants = {
   public: {
     Enums: {
       finalidade_imovel: ["venda", "aluguel", "ambos"],
+      origem_imovel: ["proprio", "intermediacao"],
       status_imovel: ["disponivel", "reservado", "vendido", "alugado"],
+      tipo_comissao: ["percentual", "fixo"],
     },
   },
 } as const

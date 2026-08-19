@@ -16,7 +16,12 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { ROTULOS_FINALIDADE, ROTULOS_STATUS } from '@/lib/imovel-labels'
+import {
+  ROTULOS_FINALIDADE,
+  ROTULOS_ORIGEM,
+  ROTULOS_STATUS,
+  ROTULOS_TIPO_COMISSAO,
+} from '@/lib/imovel-labels'
 import { supabase } from '@/lib/supabase'
 import type { Enums, Tables, TablesInsert } from '@/types/database'
 
@@ -42,6 +47,13 @@ type Formulario = {
   status: Enums<'status_imovel'>
   observacoes_documentacao: string
   documentacao_publica: boolean
+  origem: Enums<'origem_imovel'>
+  proprietario_nome: string
+  proprietario_contato: string
+  comissao_venda_tipo: Enums<'tipo_comissao'> | ''
+  comissao_venda_valor: string
+  comissao_aluguel_tipo: Enums<'tipo_comissao'> | ''
+  comissao_aluguel_valor: string
   publicado: boolean
   destaque: boolean
 }
@@ -68,6 +80,13 @@ const FORMULARIO_VAZIO: Formulario = {
   status: 'disponivel',
   observacoes_documentacao: '',
   documentacao_publica: false,
+  origem: 'proprio',
+  proprietario_nome: '',
+  proprietario_contato: '',
+  comissao_venda_tipo: '',
+  comissao_venda_valor: '',
+  comissao_aluguel_tipo: '',
+  comissao_aluguel_valor: '',
   publicado: false,
   destaque: false,
 }
@@ -95,6 +114,13 @@ function paraFormulario(imovel: Tables<'imoveis'>): Formulario {
     status: imovel.status,
     observacoes_documentacao: imovel.observacoes_documentacao ?? '',
     documentacao_publica: imovel.documentacao_publica,
+    origem: imovel.origem,
+    proprietario_nome: imovel.proprietario_nome ?? '',
+    proprietario_contato: imovel.proprietario_contato ?? '',
+    comissao_venda_tipo: imovel.comissao_venda_tipo ?? '',
+    comissao_venda_valor: imovel.comissao_venda_valor?.toString() ?? '',
+    comissao_aluguel_tipo: imovel.comissao_aluguel_tipo ?? '',
+    comissao_aluguel_valor: imovel.comissao_aluguel_valor?.toString() ?? '',
     publicado: imovel.publicado,
     destaque: imovel.destaque,
   }
@@ -130,6 +156,20 @@ function paraPayload(f: Formulario): TablesInsert<'imoveis'> {
     status: f.status,
     observacoes_documentacao: f.observacoes_documentacao.trim() || null,
     documentacao_publica: f.documentacao_publica,
+    origem: f.origem,
+    proprietario_nome: f.origem === 'intermediacao' ? f.proprietario_nome.trim() || null : null,
+    proprietario_contato:
+      f.origem === 'intermediacao' ? f.proprietario_contato.trim() || null : null,
+    comissao_venda_tipo:
+      f.origem === 'intermediacao' ? (f.comissao_venda_tipo as Enums<'tipo_comissao'>) || null : null,
+    comissao_venda_valor:
+      f.origem === 'intermediacao' ? numeroOuNulo(f.comissao_venda_valor) : null,
+    comissao_aluguel_tipo:
+      f.origem === 'intermediacao'
+        ? (f.comissao_aluguel_tipo as Enums<'tipo_comissao'>) || null
+        : null,
+    comissao_aluguel_valor:
+      f.origem === 'intermediacao' ? numeroOuNulo(f.comissao_aluguel_valor) : null,
     publicado: f.publicado,
     destaque: f.destaque,
   }
@@ -499,6 +539,137 @@ export default function ImovelFormulario() {
               onCheckedChange={(v) => atualizar('documentacao_publica', v)}
             />
           </div>
+        </section>
+
+        {/* Bloco 2.5: origem e comissão — interno por padrão */}
+        <section className="flex flex-col gap-4">
+          <div>
+            <h2 className="text-sm font-medium text-muted-foreground">
+              Origem e comissão (interno)
+            </h2>
+            <p className="text-xs text-muted-foreground">
+              Esta seção é só para uso interno da imobiliária — nunca aparece no site.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="origem">Origem do imóvel</Label>
+            <Select
+              value={form.origem}
+              onValueChange={(v) => atualizar('origem', v as Enums<'origem_imovel'>)}
+            >
+              <SelectTrigger id="origem" className="w-full sm:w-72">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.entries(ROTULOS_ORIGEM).map(([valor, rotulo]) => (
+                  <SelectItem key={valor} value={valor}>
+                    {rotulo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {form.origem === 'intermediacao' && (
+            <>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="proprietario_nome">Nome do proprietário</Label>
+                  <Input
+                    id="proprietario_nome"
+                    value={form.proprietario_nome}
+                    onChange={(e) => atualizar('proprietario_nome', e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="proprietario_contato">Contato do proprietário</Label>
+                  <Input
+                    id="proprietario_contato"
+                    value={form.proprietario_contato}
+                    onChange={(e) => atualizar('proprietario_contato', e.target.value)}
+                    placeholder="Telefone, WhatsApp etc."
+                  />
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-border p-3">
+                <p className="mb-3 text-xs font-medium text-muted-foreground">Comissão de venda</p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="comissao_venda_tipo">Tipo</Label>
+                    <Select
+                      value={form.comissao_venda_tipo}
+                      onValueChange={(v) =>
+                        atualizar('comissao_venda_tipo', v as Enums<'tipo_comissao'>)
+                      }
+                    >
+                      <SelectTrigger id="comissao_venda_tipo" className="w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ROTULOS_TIPO_COMISSAO).map(([valor, rotulo]) => (
+                          <SelectItem key={valor} value={valor}>
+                            {rotulo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="comissao_venda_valor">Valor</Label>
+                    <Input
+                      id="comissao_venda_valor"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.comissao_venda_valor}
+                      onChange={(e) => atualizar('comissao_venda_valor', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-border p-3">
+                <p className="mb-3 text-xs font-medium text-muted-foreground">
+                  Comissão de aluguel
+                </p>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="comissao_aluguel_tipo">Tipo</Label>
+                    <Select
+                      value={form.comissao_aluguel_tipo}
+                      onValueChange={(v) =>
+                        atualizar('comissao_aluguel_tipo', v as Enums<'tipo_comissao'>)
+                      }
+                    >
+                      <SelectTrigger id="comissao_aluguel_tipo" className="w-full">
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ROTULOS_TIPO_COMISSAO).map(([valor, rotulo]) => (
+                          <SelectItem key={valor} value={valor}>
+                            {rotulo}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="comissao_aluguel_valor">Valor</Label>
+                    <Input
+                      id="comissao_aluguel_valor"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.comissao_aluguel_valor}
+                      onChange={(e) => atualizar('comissao_aluguel_valor', e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </section>
 
         {/* Bloco 3: controle */}
